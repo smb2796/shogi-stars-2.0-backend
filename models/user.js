@@ -8,7 +8,7 @@ const userSchema = new Schema({
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true , minlength: 6 },
     profilePicture: { type: String, required: true},
-    games: { type: String, required: true},
+    games: [{ type: mongoose.Types.ObjectId, required: true, ref: 'Game' }],
     name: { type: String, required: true },
     birthdate: { type: String, required: true },
     rating: { type: Number, required: true}

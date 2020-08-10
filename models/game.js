@@ -3,11 +3,8 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const gameSchema = new Schema({
-    creatorPlayer: { type: String, required: true },
-    players: { 
-        player1: { type: String, required: true },
-        player2: { type: String, required: true }
-    },
+    creatorPlayer: { type: mongoose.Types.ObjectId, required: true, ref: 'User' },
+    players: [{ type: mongoose.Types.ObjectId, required: true, ref: 'User' }],
     status: { type: String, required: true },
     type: { 
         handicap: { type: String, required: true },

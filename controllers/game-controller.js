@@ -3,7 +3,8 @@ const { validationResult } = require('express-validator');
 
 const HttpError = require('../models/http-error');
 const Game = require('../models/game');
-const { restart } = require('nodemon');
+const User = require('../models/user');
+// const { restart } = require('nodemon');
 
 //works
 const getGameById = async (req, res, next) => {
@@ -105,11 +106,11 @@ const createGame = async (req, res, next) => {
             new HttpError('Invalid inputs', 422)
         );
     }
-    const { creatorPlayer, players, status, type, timers } = req.body;
+    const { creatorPlayer, status, type, timers } = req.body;
 
     const createdGame = new Game({
         creatorPlayer,
-        players,
+        players: [],
         status,
         type,
         timers,
