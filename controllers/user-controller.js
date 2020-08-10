@@ -6,7 +6,8 @@ const HttpError = require('../models/http-error');
 const User = require('../models/user');
 
 const getUsers = (req, res, next) => {
-    res.json({ users: exampleUsers });
+    const users = await User.find().exec();
+    res.json({ users: users });
 };
 
 const signup = (req, res, next) => {
@@ -58,6 +59,72 @@ const login = (req, res, next) => {
      });
 };
 
+const updateUserById = async (req, res, next) => {
+    const errors = validationResult(req);
+    if(!errors.isEmpty()) {
+        throw new HttpError('Invalid inputs passed, please check data', 422);
+    }
+
+    const { username, password, profilePicture, games, name, birthdate, rating } = req.body;
+    const userId = req.params.userId;
+
+    let user;
+    try {
+        user = await User.findById(userId);
+    } catch (err) {
+        const error = new HttpError(
+            'Could not update user', 500
+        );
+        return next (error);
+    }
+
+    user.username = username;
+    user.password = password;
+    user.profilePicture = profilePicture;
+    user.games = games;
+    user.name = name;
+    user.birthdate = birthdate;
+    user.rating = rating;
+
+    try {
+        await user.save();
+    } catch (err) {
+        const error = new HttpError(
+            'Could not update user', 500
+        );
+        return next (error);
+    }
+
+    res.status(200).json({ user: user.toObject({ getters: true })});
+};
+
+const deleteUserById = async (req, res, next) => {
+    const userId = req.params.userId;
+
+    let user;
+    try {
+        user = await User.findById(userId);
+    } catch (err) {
+        const error = new HttpError(
+            'Could not delete user', 500
+        );
+        return next (error);
+    }
+
+    try {
+        user.remove();
+    } catch (err) {
+        const error = new HttpError(
+            'Could not delete user', 500
+        );
+        return next (error);
+    }
+
+    res.status(200).json({ response: `User ${userId} has been deleted`});
+};
+
 exports.getUsers = getUsers;
 exports.signup = signup;
 exports.login = login;
+exports.deleteUserById = deleteUserById;
+exports.updateUserById = updateUserById;

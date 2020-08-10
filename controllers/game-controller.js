@@ -164,7 +164,7 @@ const deleteGameById = async (req, res, next) => {
         game = await Game.findById(gameId);
     } catch (err) {
         const error = new HttpError(
-            'Could not delete place', 400
+            'Could not delete game', 400
         );
         return next (error);
     }
@@ -173,7 +173,7 @@ const deleteGameById = async (req, res, next) => {
         game.remove();
     } catch (err) {
         const error = new HttpError(
-            'Could not delete place', 400
+            'Could not delete game', 400
         );
         return next (error);
     }
