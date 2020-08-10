@@ -4,6 +4,8 @@ const { validationResult } = require('express-validator');
 const HttpError = require('../models/http-error');
 const Game = require('../models/game');
 const User = require('../models/user');
+const mongooseUniqueValidator = require('mongoose-unique-validator');
+const user = require('../models/user');
 // const { restart } = require('nodemon');
 
 //works
@@ -106,19 +108,41 @@ const createGame = async (req, res, next) => {
             new HttpError('Invalid inputs', 422)
         );
     }
-    const { creatorPlayer, status, type, timers } = req.body;
+    const { creatorPlayer, players, status, type, timers } = req.body;
 
     const createdGame = new Game({
         creatorPlayer,
-        players: [],
+        players,
         status,
         type,
         timers,
         turn: 1
     });
 
+    let player;
     try {
-        await createdGame.save();
+        player = await User.findById(creatorPlayer)
+    } catch (err){
+        const error = new HttpError(
+            'Creating game failed, please try again.',
+            500
+          );
+          return next(error);
+    }
+
+    if(!player) {
+        const error = new HttpError('Something went wrong with adding player to the game', 404);
+        return next (error);
+    }
+
+    try {
+        const sess = await mongoose.startSession();
+        sess.startTransaction();
+        await createdGame.save({ session: sess });
+        player.games.push(createdGame);
+        await player.save({ session: sess });
+        await sess.commitTransaction();
+        
     } catch (err) {
         const error = new HttpError(
           'Creating game failed, please try again.',
