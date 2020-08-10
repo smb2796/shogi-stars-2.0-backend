@@ -28,7 +28,7 @@ const signup = async (req, res, next) => {
        );
     }
 
-    const { username, email, password, profilePicture, name, birthdate, rating } = req.body;
+    const { username, email, password, name, birthdate, rating, profilePicture } = req.body;
 
     let existingUser;
     try {
@@ -53,11 +53,11 @@ const signup = async (req, res, next) => {
         username, 
         email, 
         password, 
-        games: [], 
         name, 
         birthdate, 
         rating,
-        profilePicture
+        profilePicture,
+        games: []
     });
 
     try {

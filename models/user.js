@@ -11,7 +11,8 @@ const userSchema = new Schema({
     games: [{ type: mongoose.Types.ObjectId, required: true, ref: 'Game' }],
     name: { type: String, required: true },
     birthdate: { type: String, required: true },
-    rating: { type: Number, required: true}
+    rating: { type: Number, required: true},
+    currentGame: { type: mongoose.Types.ObjectId, ref: 'Game' }
 });
 
 userSchema.plugin(uniqueValidator);

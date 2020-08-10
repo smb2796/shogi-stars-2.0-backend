@@ -4,9 +4,7 @@ const { validationResult } = require('express-validator');
 const HttpError = require('../models/http-error');
 const Game = require('../models/game');
 const User = require('../models/user');
-const mongooseUniqueValidator = require('mongoose-unique-validator');
-const user = require('../models/user');
-// const { restart } = require('nodemon');
+const mongoose = require('mongoose');
 
 //works
 const getGameById = async (req, res, next) => {
@@ -33,15 +31,18 @@ const getGameById = async (req, res, next) => {
     res.json({ game: game.toObject( {getters: true }) });
 };
 
-// Need to fix to query the object of players correctly
+// Works
 const getGamesByUserId = async (req, res, next) => {
     const userId = req.params.userId;
     
-    let games;
+    // let games;
+    let userWithGames;
     try {
-        games = await Game.find({ players: {
-            player1: userId
-        }});
+        // games = await Game.find({ players: {
+        //     player1: userId
+        // }});
+
+        userWithGames = await User.findById(userId).populate('games');
     } catch (err) {
         const error = new HttpError(
             'Could not find the game.', 500
@@ -49,7 +50,7 @@ const getGamesByUserId = async (req, res, next) => {
         return next(error);
     }
    
-    if(!games || games.length === 0) {
+    if(!userWithGames || userWithGames.length === 0) {
         const error = new HttpError(
             'Could not find games by this user id', 404
         );
@@ -57,7 +58,7 @@ const getGamesByUserId = async (req, res, next) => {
     }
 
     //removes _ from _id in mongoose object
-    res.json({ games: games.map(game => game.toObject({ getters: true })) });
+    res.json({ games: userWithGames.games.map(game => game.toObject({ getters: true })) });
 };
 
 //works
@@ -116,7 +117,8 @@ const createGame = async (req, res, next) => {
         status,
         type,
         timers,
-        turn: 1
+        turn: 0,
+        moveHistory: []
     });
 
     let player;
@@ -198,7 +200,7 @@ const deleteGameById = async (req, res, next) => {
 
     let game;
     try {
-        game = await Game.findById(gameId);
+        game = await (await Game.findById(gameId)).populated('creatorPlayer');
     } catch (err) {
         const error = new HttpError(
             'Could not delete game', 400
@@ -206,8 +208,19 @@ const deleteGameById = async (req, res, next) => {
         return next (error);
     }
 
+    if(!place) {
+        const error = new HttpError('Could not find the game of this ID', 404);
+        return next (error);
+    }
+
+
     try {
-        game.remove();
+        const sess = await mongoose.startSession();
+        sess.startTransaction();
+        await game.remove({ session: sess });
+        game.creatorPlayer.games.pull(game);
+        await game.creatorPlayer.save({session: sess});
+        await sess.commitTransaction();
     } catch (err) {
         const error = new HttpError(
             'Could not delete game', 400
