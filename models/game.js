@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const gameSchema = new Schema({
+    creatorPlayer: { type: String, required: true },
     players: { 
         player1: { type: String, required: true },
         player2: { type: String, required: true }

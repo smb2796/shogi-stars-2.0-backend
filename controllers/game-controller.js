@@ -105,9 +105,10 @@ const createGame = async (req, res, next) => {
             new HttpError('Invalid inputs', 422)
         );
     }
-    const { players, status, type, timers } = req.body;
+    const { creatorPlayer, players, status, type, timers } = req.body;
 
     const createdGame = new Game({
+        creatorPlayer,
         players,
         status,
         type,
@@ -125,7 +126,7 @@ const createGame = async (req, res, next) => {
         return next(error);
     } 
 
-    res.status(201).json({ game: createdGame });
+    res.status(201).json({ game: createdGame.toObject({ getters: true }) });
 }
 
 //works correctly

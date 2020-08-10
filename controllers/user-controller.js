@@ -56,20 +56,20 @@ const signup = async (req, res, next) => {
         name, 
         birthdate, 
         rating,
-        profilePicture: 'https://images2.minutemediacdn.com/image/upload/c_crop,h_359,w_640,x_0,y_47/f_auto,q_auto,w_1100/v1554933298/shape/mentalfloss/burthed.jpg'
+        profilePicture
     });
 
     try {
         await createdUser.save();
     } catch (err) {
         const error = new HttpError(
-          'Signing upfailed, please try again.',
+          'Signing up failed, please try again.',
           500
         );
         return next(error);
     } 
 
-    res.status(201).json({user: createdUser.toObject({ getter: true })});
+    res.status(201).json({user: createdUser.toObject({ getters: true })});
 };
 
 const login = async (req, res, next) => {
@@ -86,16 +86,16 @@ const login = async (req, res, next) => {
         return next(error);
     }
 
-    let token;
-    try {
-        token = jwt.sign({userId: identifiedUser.id, email: identifiedUser.email}, 
-            'examplesecret', 
-            {expiresIn: '1h'});    
-    } catch (err) {
-        return next(
-            new HttpError('Login failed', 500)
-        );
-    }
+    // let token;
+    // try {
+    //     token = jwt.sign({userId: identifiedUser.id, email: identifiedUser.email}, 
+    //         'examplesecret', 
+    //         {expiresIn: '1h'});    
+    // } catch (err) {
+    //     return next(
+    //         new HttpError('Login failed', 500)
+    //     );
+    // }
 
     if(!existingUser || existingUser.password !== password){
         const error = new HttpError(
@@ -109,14 +109,9 @@ const login = async (req, res, next) => {
 };
 
 const updateUserById = async (req, res, next) => {
-    const errors = validationResult(req);
-    if(!errors.isEmpty()) {
-        return next(
-            new HttpError('Invalid inputs passed, please check data', 422)
-        );
-    }
 
-    const { username, password, profilePicture, games, name, birthdate, rating } = req.body;
+    // const { password, profilePicture, games, name, birthdate, rating } = req.body;
+    const { name } = req.body;
     const userId = req.params.userId;
 
     let user;
@@ -129,13 +124,12 @@ const updateUserById = async (req, res, next) => {
         return next (error);
     }
 
-    user.username = username;
-    user.password = password;
-    user.profilePicture = profilePicture;
-    user.games = games;
+    // user.password = password;
+    // user.profilePicture = profilePicture;
+    // user.games = games;
     user.name = name;
-    user.birthdate = birthdate;
-    user.rating = rating;
+    // user.birthdate = birthdate;
+    // user.rating = rating;
 
     try {
         await user.save();
