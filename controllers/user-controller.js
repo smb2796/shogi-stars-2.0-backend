@@ -63,14 +63,18 @@ const signup = async (req, res, next) => {
     res.status(201).json({user: createdUser.toObject({ getter: true })});
 };
 
-const login = (req, res, next) => {
+const login = async (req, res, next) => {
     const { email, password } = req.body;
 
-    const identifiedUser = exampleUsers.find(user => user.email === email);
-    if(!identifiedUser || identifiedUser.password !== password) {
-        return next(
-            new HttpError('Username or pw is wrong', 401)
+    let existingUser;
+    try {
+        existingUser = await User.findOne({ email: email });
+    } catch (err) {
+        const error = new HttpError(
+            'Error with logging in. Please try again later',
+            500
         );
+        return next(error);
     }
 
     let token;
@@ -83,12 +87,16 @@ const login = (req, res, next) => {
             new HttpError('Login failed', 500)
         );
     }
+
+    if(!existingUser || existingUser.password !== password){
+        const error = new HttpError(
+            'Username or password is incorrect.',
+            401
+        );
+        return next (error)
+    }
     
-    res.json({ 
-        userId: identifiedUser.id,
-        email: identifiedUser.email,
-        token: token
-     });
+    res.json({ message: 'Logged in successfully'});
 };
 
 const updateUserById = async (req, res, next) => {
