@@ -123,7 +123,9 @@ const createGame = async (req, res, next) => {
 const updateGameById = async (req, res, next) => {
     const errors = validationResult(req);
     if(!errors.isEmpty()) {
-        throw new HttpError('Invalid inputs passed, please check data', 422);
+        return next(
+            new HttpError('Invalid inputs passed, please check data', 422)
+        );
     }
 
     const { status, timers } = req.body;

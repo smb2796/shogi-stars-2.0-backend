@@ -13,7 +13,9 @@ const getUsers = async (req, res, next) => {
 const signup = async (req, res, next) => {
     const errors = validationResult(req);
     if(!errors.isEmpty()) {
-        throw new HttpError('Invalid input', 422);
+       return next(
+         new HttpError('Invalid input', 422)
+       );
     }
 
     const { username, email, password, profilePicture, games, name, birthdate, rating } = req.body;
@@ -66,7 +68,9 @@ const login = (req, res, next) => {
 
     const identifiedUser = exampleUsers.find(user => user.email === email);
     if(!identifiedUser || identifiedUser.password !== password) {
-        throw new HttpError('Username or pw is wrong', 401);
+        return next(
+            new HttpError('Username or pw is wrong', 401)
+        );
     }
 
     let token;
@@ -75,7 +79,9 @@ const login = (req, res, next) => {
             'examplesecret', 
             {expiresIn: '1h'});    
     } catch (err) {
-        throw new HttpError('Login failed', 500);
+        return next(
+            new HttpError('Login failed', 500)
+        );
     }
     
     res.json({ 
@@ -88,7 +94,9 @@ const login = (req, res, next) => {
 const updateUserById = async (req, res, next) => {
     const errors = validationResult(req);
     if(!errors.isEmpty()) {
-        throw new HttpError('Invalid inputs passed, please check data', 422);
+        return next(
+            new HttpError('Invalid inputs passed, please check data', 422)
+        );
     }
 
     const { username, password, profilePicture, games, name, birthdate, rating } = req.body;
