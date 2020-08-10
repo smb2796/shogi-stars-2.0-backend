@@ -29,7 +29,7 @@ const getGameById = async (req, res, next) => {
     res.json({ game: game.toObject( {getters: true }) });
 };
 
-//
+// Need to fix to query the object of players correctly
 const getGamesByUserId = async (req, res, next) => {
     const userId = req.params.userId;
     
@@ -56,6 +56,7 @@ const getGamesByUserId = async (req, res, next) => {
     res.json({ games: games.map(game => game.toObject({ getters: true })) });
 };
 
+//works
 const getGamesByStatus = async (req, res, next) => {
     const status = req.params.status;
     
@@ -117,18 +118,40 @@ const createGame = async (req, res, next) => {
     res.status(201).json({ game: createdGame });
 }
 
-const updateGameById = (req, res, next) => {
-    const { gameName, gtin } = req.body;
+//works correctly
+const updateGameById = async (req, res, next) => {
+    const errors = validationResult(req);
+    if(!errors.isEmpty()) {
+        throw new HttpError('Invalid inputs passed, please check data', 422);
+    }
+
+    const { status, timers } = req.body;
     const gameId = req.params.gameId;
 
-    const updatedGame = { ...exampleGames.find(game => game.gameId === gameId) };
-    const gameIndex = exampleGames.findIndex(game => game.gameId === gameId);
+    let game;
+    try {
+        game = await Game.findById(gameId);
+    } catch (err) {
+        const error = new HttpError(
+            'Could not update game', 500
+        );
+        return next (error);
+    }
 
-    updatedGame.gameName = gameName;
-    updatedGame.gtin = gtin;
+    game.status = status;
+    game.timers.timer1 = timers.timer1;
+    game.timers.timer2 = timers.timer2;
 
-    exampleGames[gameIndex] = updatedGame;
-    res.status(200).json({game: updatedGame});
+    try {
+        await game.save();
+    } catch (err) {
+        const error = new HttpError(
+            'Could not update game', 500
+        );
+        return next (error);
+    }
+
+    res.status(200).json({ game: game.toObject({ getters: true })});
 
 };
 
