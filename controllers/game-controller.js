@@ -4,18 +4,7 @@ const { validationResult } = require('express-validator');
 const HttpError = require('../models/http-error');
 const Game = require('../models/game');
 
-const exampleGames = [
-    {
-        gameId: 'ex1',
-        gameName: 'medicine',
-        gtin: '12346123571234',
-        description: {
-            qty: 1325,
-            color: 'blue'
-        }
-    }
-];
-
+//works
 const getGameById = async (req, res, next) => {
     const gameId = req.params.gameId;
     
@@ -36,13 +25,68 @@ const getGameById = async (req, res, next) => {
         return next(error);
     }
 
-    res.json({ game });
+    //removes _ from _id in mongoose object
+    res.json({ game: game.toObject( {getters: true }) });
 };
 
-const getGames = (req, res, next) => {
-    res.json({games: exampleGames});
+//
+const getGamesByUserId = async (req, res, next) => {
+    const userId = req.params.userId;
+    
+    let games;
+    try {
+        games = await Game.find({ players: {
+            player1: userId
+        }});
+    } catch (err) {
+        const error = new HttpError(
+            'Could not find the game.', 500
+        );
+        return next(error);
+    }
+   
+    if(!games || games.length === 0) {
+        const error = new HttpError(
+            'Could not find games by this user id', 404
+        );
+        return next(error);
+    }
+
+    //removes _ from _id in mongoose object
+    res.json({ games: games.map(game => game.toObject({ getters: true })) });
+};
+
+const getGamesByStatus = async (req, res, next) => {
+    const status = req.params.status;
+    
+    let games;
+    try {
+        games = await Game.find({ status: status });
+    } catch (err) {
+        const error = new HttpError(
+            'Could not find the game.', 500
+        );
+        return next(error);
+    }
+   
+    if(!games || games.length === 0) {
+        const error = new HttpError(
+            `Could not find any games in status ${status}`, 404
+        );
+        return next(error);
+    }
+
+    //removes _ from _id in mongoose object
+    res.json({ games: games.map(game => game.toObject({ getters: true })) });
+};
+
+//Finished
+const getGames = async (req, res, next) => {
+    const games = await Game.find().exec();
+    res.json({games: games});
 }
 
+//Finished for now
 const createGame = async (req, res, next) => {
     const errors = validationResult(req);
     if(!errors.isEmpty()) {
@@ -90,6 +134,9 @@ const updateGameById = (req, res, next) => {
 
 
 exports.getGameById = getGameById;
-exports.getGames = getGames;
+exports.getGamesByUserId = getGamesByUserId;
+exports.getGamesByStatus = getGamesByStatus;
 exports.createGame = createGame;
+
+exports.getGames = getGames;
 exports.updateGameById = updateGameById;
