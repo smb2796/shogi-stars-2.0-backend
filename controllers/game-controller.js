@@ -3,6 +3,7 @@ const { validationResult } = require('express-validator');
 
 const HttpError = require('../models/http-error');
 const Game = require('../models/game');
+const { restart } = require('nodemon');
 
 //works
 const getGameById = async (req, res, next) => {
@@ -155,11 +156,37 @@ const updateGameById = async (req, res, next) => {
 
 };
 
+const deleteGameById = async (req, res, next) => {
+    const gameId = req.params.gameId;
+
+    let game;
+    try {
+        game = await Game.findById(gameId);
+    } catch (err) {
+        const error = new HttpError(
+            'Could not delete place', 400
+        );
+        return next (error);
+    }
+
+    try {
+        game.remove();
+    } catch (err) {
+        const error = new HttpError(
+            'Could not delete place', 400
+        );
+        return next (error);
+    }
+
+    res.status(200).json({ response: `Game ${gameId} has been deleted`});
+}
+
 
 exports.getGameById = getGameById;
-exports.getGamesByUserId = getGamesByUserId;
 exports.getGamesByStatus = getGamesByStatus;
 exports.createGame = createGame;
-
-exports.getGames = getGames;
 exports.updateGameById = updateGameById;
+exports.getGames = getGames;
+exports.deleteGameById = deleteGameById;
+
+exports.getGamesByUserId = getGamesByUserId;

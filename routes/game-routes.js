@@ -25,4 +25,6 @@ router.post('/',
 
 router.patch('/:gameId', gameController.updateGameById);
 
+router.delete('/:gameId', gameController.deleteGameById);
+
 module.exports = router;
