@@ -13,10 +13,9 @@ router.get('/game/:gameId', gameController.getGameById);
 
 router.post('/', 
     [
-        check('gameName')
+        check('players')
             .not()
-            .isEmpty(),
-        check('gtin').isLength({min: 5})
+            .isEmpty()
     ],
     gameController.createGame);
 

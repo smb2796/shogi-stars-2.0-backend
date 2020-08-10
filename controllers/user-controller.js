@@ -1,7 +1,9 @@
 const uuid = require('uuid/v4');
-const HttpError = require('../models/http-error');
 const { validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
+
+const HttpError = require('../models/http-error');
+const User = require('../models/user');
 
 const getUsers = (req, res, next) => {
     res.json({ users: exampleUsers });
@@ -19,14 +21,15 @@ const signup = (req, res, next) => {
     if(hasUser) {
         throw new HttpError('Email already in use', 422);
     }
-    const createdUser = {
-        id: uuid(),
-        name: name,
-        email: email,
-        password: password
-    }
+    const createdUser = new User({
+        username,
+        email,
+        password,
+        rating,
+        profilePicture: 'https://images2.minutemediacdn.com/image/upload/c_crop,h_359,w_640,x_0,y_47/f_auto,q_auto,w_1100/v1554933298/shape/mentalfloss/burthed.jpg'
+    });
 
-    exampleUsers.push(createdUser);
+    createdUser.save();
 
     res.status(201).json({user: createdUser});
 };
