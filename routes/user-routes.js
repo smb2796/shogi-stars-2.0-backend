@@ -1,25 +1,26 @@
 const express = require('express');
 const { check } = require('express-validator');
 
-const scanControllers = require('../controllers/scan-controller');
+const userController = require('../controllers/user-controller');
 const router = express.Router();
-const checkAuth = require('../middleware/check-auth');
 
-router.use(checkAuth);
+router.get('/', userController.getUsers);
 
-router.get('/scans', scanControllers.getScans);
 
-router.get('/scan/:scanId', scanControllers.getScansById);
-
-router.post('/', 
+router.post(
+    '/signup',
     [
-        check('scanName')
-            .not()
-            .isEmpty(),
-        check('gtin').isLength({min: 5})
+    check('name')
+        .not()
+        .isEmpty(),
+    check('email')
+        .normalizeEmail()
+        .isEmail(),
+    check('password').isLength({ min: 6 })
     ],
-    scanControllers.createScan);
+    userController.signup);
 
-router.patch('/scan/:scanId', scanControllers.updateScanById);
+router.post('/login', userController.login);
+
 
 module.exports = router;

@@ -3,15 +3,6 @@ const HttpError = require('../models/http-error');
 const { validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 
-const exampleUsers = [
-    {
-        id: "user1",
-        name: "Sean Brown",
-        email: "example@example.com",
-        password: "examplepw"
-    }
-];
-
 const getUsers = (req, res, next) => {
     res.json({ users: exampleUsers });
 };
@@ -54,7 +45,7 @@ const login = (req, res, next) => {
             'examplesecret', 
             {expiresIn: '1h'});    
     } catch (err) {
-        const error = new HttpError('Login failed', 500);
+        throw new HttpError('Login failed', 500);
     }
     
     res.json({ 

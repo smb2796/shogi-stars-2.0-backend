@@ -2,8 +2,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const HttpError = require('./models/http-error');
 
-const authRoutes = require('./routes/auth-routes');
-const scanRoutes = require('./routes/scan-routes');
+const userRoutes = require('./routes/user-routes');
+const gameRoutes = require('./routes/game-routes');
 
 
 const app = express();
@@ -21,8 +21,8 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use('/api/auth', authRoutes);
-app.use('/api/data', scanRoutes);
+app.use('/api/user', userRoutes);
+app.use('/api/game', gameRoutes);
 
 app.use((req, res, next) => {
     const error = new HttpError('Route does not exist.', 404);
@@ -36,8 +36,6 @@ app.use((error, req, res, next) => {
     res.status(error.code || 500);
     res.json({message: error.message || 'Error occured'});
 });
-
-//put pg connection here
 
 
 

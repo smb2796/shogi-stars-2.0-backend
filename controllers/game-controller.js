@@ -2,10 +2,10 @@
 const HttpError = require('../models/http-error');
 const { validationResult } = require('express-validator');
 
-const exampleScans = [
+const exampleGames = [
     {
-        scanId: 'ex1',
-        scanName: 'medicine',
+        gameId: 'ex1',
+        gameName: 'medicine',
         gtin: '12346123571234',
         description: {
             qty: 1325,
@@ -14,59 +14,59 @@ const exampleScans = [
     }
 ];
 
-const getScansById = (req, res, next) => {
-    const scanId = req.params.scanId;
-    const scans = exampleScans.filter(foundScan => {
-        return foundScan.scanId === scanId;
+const getGameById = (req, res, next) => {
+    const gameId = req.params.gameId;
+    const games = exampleGames.filter(foundGame => {
+        return foundGame.gameId === gameId;
     });
 
-    if(!scans || scans.length === 0) {
+    if(!games || games.length === 0) {
         
-        return next(new HttpError('Could not find scans by this id', 404));
+        return next(new HttpError('Could not find games by this id', 404));
     }
-    console.log('GET scan by scan id');
-    res.json({scan: scan});
+    console.log('GET game by game id');
+    res.json({game: game});
 }
 
-const getScans = (req, res, next) => {
-    res.json({scans: exampleScans});
+const getGames = (req, res, next) => {
+    res.json({games: exampleGames});
 }
 
-const createScan = (req, res, next) => {
+const createGame = (req, res, next) => {
     const errors = validationResult(req);
     if(!errors.isEmpty()) {
         throw new HttpError('Invalid inputs', 422);
     }
-    const { scanId, scanName, gtin } = req.body;
+    const { gameId, gameName, gtin } = req.body;
 
-    const createdScan = {
-        scanId,
-        scanName,
+    const createdGame = {
+        gameId,
+        gameName,
         gtin
     }
 
-    exampleScans.push(createdScan);
+    exampleGames.push(createdGame);
 
-    res.status(201).json({scan: createdScan});
+    res.status(201).json({game: createdGame});
 }
 
-const updateScanById = (req, res, next) => {
-    const { scanName, gtin } = req.body;
-    const scanId = req.params.scanId;
+const updateGameById = (req, res, next) => {
+    const { gameName, gtin } = req.body;
+    const gameId = req.params.gameId;
 
-    const updatedScan = { ...exampleScans.find(scan => scan.scanId === scanId) };
-    const scanIndex = exampleScans.findIndex(scan => scan.scanId === scanId);
+    const updatedGame = { ...exampleGames.find(game => game.gameId === gameId) };
+    const gameIndex = exampleGames.findIndex(game => game.gameId === gameId);
 
-    updatedScan.scanName = scanName;
-    updatedScan.gtin = gtin;
+    updatedGame.gameName = gameName;
+    updatedGame.gtin = gtin;
 
-    exampleScans[scanIndex] = updatedScan;
-    res.status(200).json({scan: updatedScan});
+    exampleGames[gameIndex] = updatedGame;
+    res.status(200).json({game: updatedGame});
 
 };
 
 
-exports.getScansById = getScansById;
-exports.getScans = getScans;
-exports.createScan = createScan;
-exports.updateScanById = updateScanById;
+exports.getGameById = getGameById;
+exports.getGames = getGames;
+exports.createGame = createGame;
+exports.updateGameById = updateGameById;

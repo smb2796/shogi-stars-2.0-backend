@@ -1,26 +1,25 @@
 const express = require('express');
 const { check } = require('express-validator');
 
-const authController = require('../controllers/auth-controller');
+const gameController = require('../controllers/game-controller');
 const router = express.Router();
+const checkAuth = require('../middleware/check-auth');
 
-router.get('/', authController.getUsers);
+// router.use(checkAuth);
 
+router.get('/games', gameController.getGames);
 
-router.post(
-    '/signup',
+router.get('/game/:gameId', gameController.getGameById);
+
+router.post('/', 
     [
-    check('name')
-        .not()
-        .isEmpty(),
-    check('email')
-        .normalizeEmail()
-        .isEmail(),
-    check('password').isLength({ min: 6 })
+        check('gameName')
+            .not()
+            .isEmpty(),
+        check('gtin').isLength({min: 5})
     ],
-    authController.signup);
+    gameController.createGame);
 
-router.post('/login', authController.login);
-
+router.patch('/game/:gameId', gameController.updateGameById);
 
 module.exports = router;
