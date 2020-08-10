@@ -84,8 +84,17 @@ const getGamesByStatus = async (req, res, next) => {
 
 //Finished
 const getGames = async (req, res, next) => {
-    const games = await Game.find().exec();
-    res.json({games: games});
+    let games;
+    try {
+        games = await Game.find({}, 'id players status').exec();
+    } catch (err) {
+        const error = new HttpError(
+            'Getting all games failed',
+            500
+        );
+        return next(error);
+    }
+    res.json({ games: games.map(game => game.toObject({ getters: true })) });
 }
 
 //Finished for now

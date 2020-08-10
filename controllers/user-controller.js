@@ -6,8 +6,17 @@ const HttpError = require('../models/http-error');
 const User = require('../models/user');
 
 const getUsers = async (req, res, next) => {
-    const users = await User.find().exec();
-    res.json({ users: users });
+    let users;
+    try {
+        users = await User.find({}, 'email name').exec();
+    } catch (err) {
+        const error = new HttpError(
+            'Getting users failed',
+            500
+        );
+        return next(error);
+    }
+    res.json({ users: users.map(user => user.toObject({ getters: true })) });
 };
 
 const signup = async (req, res, next) => {
