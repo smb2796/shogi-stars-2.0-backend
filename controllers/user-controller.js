@@ -109,7 +109,7 @@ const login = async (req, res, next) => {
     //     );
     // }
 
-    if(!existingUser || existingUser.password !== password){
+    if(!existingUser){
         const error = new HttpError(
             'Username or password is incorrect.',
             401
@@ -117,7 +117,26 @@ const login = async (req, res, next) => {
         return next (error)
     }
     
-    res.json({ message: 'Logged in successfully'});
+    let isValidPass = false;
+    try {
+        isValidPass = await bcrypt.compare(password, existingUser.password);
+    } catch (err){
+        const error = new HttpError('Login failed', 500);
+        return next(error);
+    }
+
+    if (!isValidPassword) {
+        const error = new HttpError(
+            'Credentials are incorrect. Please check your password',
+            401
+        );
+        return next(error);
+    }
+    
+    res.json({ 
+        message: 'Logged in successfully', 
+        user: existingUser.toObject({ getters: true })
+    });
 };
 
 const updateUserById = async (req, res, next) => {
